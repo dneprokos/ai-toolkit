@@ -1,9 +1,9 @@
-# Agent Skills
+# AI Toolkit
 
-[![License](https://img.shields.io/github/license/dneprokos/agent-skills?style=flat-square)](LICENSE)
-[![Stars](https://img.shields.io/github/stars/dneprokos/agent-skills?style=flat-square)](https://github.com/dneprokos/agent-skills/stargazers)
+[![License](https://img.shields.io/github/license/dneprokos/ai-toolkit?style=flat-square)](LICENSE)
+[![Stars](https://img.shields.io/github/stars/dneprokos/ai-toolkit?style=flat-square)](https://github.com/dneprokos/ai-toolkit/stargazers)
 
-Reusable agent skills you can copy into `.github/skills/`, `.cursor/skills/`, or `.claude/skills/` and adapt for your own repositories. The repo contains workflows, supporting templates, and helper scripts — no build system or package manager required.
+Reusable AI tooling — agent skills, sub-agents, orchestrators, hooks, and Claude Code plugins. Copy skills into `.github/skills/`, `.cursor/skills/`, or `.claude/skills/` and adapt for your own repositories. The repo contains workflows, supporting templates, and helper scripts — no build system or package manager required.
 
 ![Reusable agent skills: modular SKILL.md workflows you copy into your skills folder](docs/assets/skills-hero.svg)
 
@@ -100,8 +100,8 @@ Things to know before using them:
 Install the plugin from this repository:
 
 ```text
-/plugin marketplace add dneprokos/agent-skills
-/plugin install slack-bug-triage@agent-skills
+/plugin marketplace add dneprokos/ai-toolkit
+/plugin install slack-bug-triage@ai-toolkit
 ```
 
 ## Getting Started
@@ -114,8 +114,8 @@ Install the plugin from this repository:
 ### Clone locally
 
 ```bash
-git clone https://github.com/dneprokos/agent-skills.git
-cd agent-skills
+git clone https://github.com/dneprokos/ai-toolkit.git
+cd ai-toolkit
 ```
 
 ### Example prompts
@@ -244,7 +244,7 @@ Type `quit` or press Ctrl+C to exit.
 ## Repository Map
 
 ```text
-agent-skills/
+ai-toolkit/
 ├── docs/
 │   ├── assets/
 │   │   └── skills-hero.svg

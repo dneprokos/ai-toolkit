@@ -8,7 +8,7 @@ Always use caveman mode (full level). Drop articles, filler words, pleasantries,
 
 ## What this repository is
 
-A collection of reusable agent skills for GitHub Copilot, Cursor, and Claude Code (repository: `dneprokos/agent-skills`). Each skill is a self-contained folder with a `SKILL.md` at its root. There is no build system, package manager, or test runner — skills are pure Markdown workflows with optional helper scripts.
+A collection of reusable AI tooling — agent skills, sub-agents, hooks, and Claude Code plugins — for GitHub Copilot, Cursor, and Claude Code (repository: `dneprokos/ai-toolkit`). Each skill is a self-contained folder with a `SKILL.md` at its root. There is no build system, package manager, or test runner — skills are pure Markdown workflows with optional helper scripts.
 
 ## Skill locations
 
@@ -21,7 +21,7 @@ A collection of reusable agent skills for GitHub Copilot, Cursor, and Claude Cod
 | `.github/agents/` | Orchestrator agents that coordinate multiple skills |
 | `.claude/agents/` | Claude Code sub-agents (`ut-*`, `qa-*`, `aqa-*`, `et-*`, `git-change-analyst`) — not mirrored |
 | `.claude/hooks/` | Claude Code hook scripts (Node, `.mjs`) — not mirrored |
-| `plugins/`, `.claude-plugin/marketplace.json` | Claude Code plugins; this repo is a plugin marketplace named `agent-skills` |
+| `plugins/`, `.claude-plugin/marketplace.json` | Claude Code plugins; this repo is a plugin marketplace named `ai-toolkit` |
 
 **When you add or modify a skill, update all three mirrors: `.github/skills/`, `.cursor/skills/`, and `.claude/skills/`.** Use the `skill-copier` skill or run the script directly to sync:
 
