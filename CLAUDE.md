@@ -14,24 +14,22 @@ A collection of reusable AI tooling — agent skills, sub-agents, hooks, and Cla
 
 | Path | Purpose |
 |---|---|
-| `.github/skills/` | Canonical skill definitions (GitHub Copilot) |
-| `.cursor/skills/` | Manual mirror of the same skills for Cursor Agent Skills |
-| `.claude/skills/` | Manual mirror of the same skills for Claude Code |
+| `.claude/skills/` | **Primary** skill location (Claude Code) — new and changed skills go here |
+| `.github/skills/` | Legacy copies for GitHub Copilot — frozen, not kept in sync |
+| `.cursor/skills/` | Legacy copies for Cursor Agent Skills — frozen, not kept in sync |
 | `.agents/skills/` | External skills pulled via `skills-lock.json` (do not edit manually) |
 | `.github/agents/` | Orchestrator agents that coordinate multiple skills |
 | `.claude/agents/` | Claude Code sub-agents (`ut-*`, `qa-*`, `aqa-*`, `et-*`, `git-change-analyst`) — not mirrored |
 | `.claude/hooks/` | Claude Code hook scripts (Node, `.mjs`) — not mirrored |
 | `plugins/`, `.claude-plugin/marketplace.json` | Claude Code plugins; this repo is a plugin marketplace named `ai-toolkit` |
 
-**When you add or modify a skill, update all three mirrors: `.github/skills/`, `.cursor/skills/`, and `.claude/skills/`.** Use the `skill-copier` skill or run the script directly to sync:
+**Do not mirror skills.** The owner works mainly in Claude Code. Add or modify skills in `.claude/skills/` only; do not copy changes to `.github/skills/` or `.cursor/skills/` unless explicitly asked. Existing copies there may drift out of date — that is expected. If a sync is requested, use the `skill-copier` skill (`-DryRun` to preview):
 
 ```powershell
-pwsh .github/skills/skill-copier/scripts/Copy-Skills.ps1 -Source .github -Destination .claude
-pwsh .github/skills/skill-copier/scripts/Copy-Skills.ps1 -Source .github -Destination .cursor -Overwrite
-# Use -DryRun to preview without making changes
+pwsh .github/skills/skill-copier/scripts/Copy-Skills.ps1 -Source .claude -Destination .github -DryRun
 ```
 
-Known gaps across mirrors:
+Historical differences between folders (from when they were mirrored):
 - `brainstorming`, `unit-test-generator`, `qa-workflow`, `qa-ship-tests` — exist only in `.claude/skills/` (Claude Code specific, they spawn sub-agents)
 - `exploratory-testing` — mirrored to all three folders, but only works in Claude Code: it spawns the Claude-only `et-sitemapper` / `et-explorer` agents and its `pw.mjs` permission rule is wired in `.claude/settings.json` only
 - `hello-world`, `slack-markdown-generator-workspace` — exist only in `.cursor/skills/`
@@ -145,7 +143,7 @@ Type any prompt at the REPL; type `quit` or Ctrl+C to exit.
 
 ## Contributing a new skill
 
-1. Create `.github/skills/{skill-name}/SKILL.md` with correct YAML frontmatter.
-2. Mirror the folder to `.cursor/skills/{skill-name}/` and `.claude/skills/{skill-name}/`.
+1. Create `.claude/skills/{skill-name}/SKILL.md` with correct YAML frontmatter.
+2. Do not mirror it to `.github/skills/` or `.cursor/skills/` unless asked.
 3. Keep the skill focused on one workflow domain.
-4. If the skill coordinates other skills, create an agent under `.github/agents/` instead.
+4. If the skill coordinates sub-agents, put the agents under `.claude/agents/`.

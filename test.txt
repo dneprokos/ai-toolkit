@@ -1,1 +1,2 @@
 Something was added.
+Second line added.

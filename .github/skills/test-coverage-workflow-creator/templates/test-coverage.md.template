@@ -1,0 +1,152 @@
+---
+name: Test Coverage Improver
+description: Nightly agent that picks one uncovered area of <<PROJECT_DESCRIPTION>>, adds unit tests for it following the repository's test conventions, and opens a draft pull request
+on:
+  schedule: <<SCHEDULE>>
+  workflow_dispatch:
+  skip-if-match: is:pr is:open in:title "<<TITLE_PREFIX>>"
+permissions: read-all
+engine:
+  id: <<ENGINE>>
+strict: true
+timeout-minutes: <<AGENT_TIMEOUT_MINUTES>>
+network:
+  allowed:
+    - defaults
+<<NETWORK_ECOSYSTEMS>>
+tools:
+  github:
+    toolsets:
+      - default
+  edit: null
+  bash: true
+safe-outputs:
+  create-pull-request:
+    title-prefix: "<<TITLE_PREFIX>> "
+    labels: [<<LABELS>>]
+    draft: true
+    expires: <<PR_EXPIRES>>
+    if-no-changes: ignore
+    protected-files: fallback-to-issue
+    max-patch-files: <<MAX_FILES>>
+    allowed-files:
+<<ALLOWED_FILES>>
+    excluded-files:
+<<EXCLUDED_FILES>>
+steps:
+  - name: Free disk space for builds and the agent sandbox
+    run: |
+      df -h /
+      sudo rm -rf /usr/local/lib/android /opt/ghc /usr/share/swift
+      df -h /
+
+  - name: Collect targets that must not be picked again
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    run: |
+      set -euo pipefail
+      mkdir -p /tmp/gh-aw/test-coverage
+      gh pr list --state all --limit 200 --search '"<<TITLE_PREFIX>>" in:title' \
+        --json state,body,labels,mergedAt |
+        jq '[.[]
+          | select(
+              .state == "OPEN"
+              or ([.labels[].name] | index("<<REJECTED_LABEL>>"))
+              or (.state == "MERGED" and ((.mergedAt | fromdateiso8601) > (now - <<COOLDOWN_SECONDS>>)))
+            )
+          | (.body // "")
+          | capture("Coverage target: `(?<target>[^`]+)`")?
+          | .target]' > /tmp/gh-aw/test-coverage/excluded.json
+      cat /tmp/gh-aw/test-coverage/excluded.json
+
+<<FETCH_COVERAGE_STEPS>>
+
+  - name: Select candidate targets
+    run: |
+      node .github/scripts/select-coverage-candidates.mjs \
+        --config .github/test-coverage/config.json \
+        --exclude /tmp/gh-aw/test-coverage/excluded.json \
+        --out /tmp/gh-aw/test-coverage/candidates.json
+      cat /tmp/gh-aw/test-coverage/candidates.json
+
+<<BUILD_STEPS>>
+---
+
+# Test Coverage Improver
+
+You raise test coverage of this repository by one small, reviewable step per run. You only ever add tests. You never change production code.
+
+## Context
+
+- **Repository**: ${{ github.repository }}
+- **Candidates** (already filtered and ranked by a script; denied areas are removed and low-priority areas are in a higher tier): `/tmp/gh-aw/test-coverage/candidates.json`
+- Each candidate has `target` (source file), `stack` (<<STACK_NAMES>>), `tier` (1 is preferred), `uncoveredLines`, `totalLines`, `linePct`, `branchPct`.
+- Coverage is measured as **line coverage**.<<COVERAGE_GOAL>>
+
+## Step 1: Read the conventions
+
+Before writing anything, read:
+
+<<CONVENTION_FILES>>
+
+## Step 2: Choose one target
+
+Read `candidates.json`. Take the highest-ranked candidate you can cover with real, behaviour-asserting unit tests. Skip a candidate (and say so in the PR) when:
+
+- it needs external services, a database or a network to do anything meaningful (the unit tests must run without them)
+- it is mostly generated code, plain data types or configuration with no behaviour to assert
+- covering it would need production code changes (for example a missing seam)
+- you cannot keep the change within the limits below
+
+If no candidate qualifies, call `noop` with a short explanation and stop.
+
+Limits for one run: a single cohesive target (one class, a small cluster, or one module), at most about <<MAX_LINES>> added lines and <<MAX_FILES>> added or changed files. If the target has more uncovered code than fits, cover the most valuable methods or branches and leave the rest for a later run.
+
+## Step 3: Write the tests
+
+- Add or extend tests only, inside the test locations: <<TEST_LOCATIONS_PROSE>>. Never touch <<FORBIDDEN_PROSE>>, even in tests.
+<<STACK_TEST_RULES>>
+- Assert behaviour (outputs, state changes, interactions, error paths, validation), not implementation details. A test that only executes lines without a meaningful assertion is not acceptable.
+- If a test reveals what looks like a production bug, do not fix it and do not assert the buggy behaviour as correct. Leave that test out and describe the suspected bug in the PR body.
+
+## Step 4: Verify
+
+Dependencies are already installed and the code is already built. Do not install packages inside the sandbox; private feed credentials are only available during setup.
+
+<<VERIFY_COMMANDS>>
+
+Every new test must pass; run it more than once if it involves timing, to rule out flakiness. If you cannot get the tests green, call `noop` instead of opening a PR.
+
+## Step 5: Review your own diff
+
+Before opening the PR, review `git diff` on two axes and fix what you find:
+
+- **Standards**: does it follow the conventions you read in Step 1? Check for duplicated setup, unclear test names and speculative helpers.
+- **Spec**: does it cover the target gap this PR claims to cover, with assertions that would fail if the behaviour broke? Does it stay inside the allowed paths and size limits?
+
+## Step 6: Open the pull request
+
+Create the pull request with `create_pull_request`, using this body:
+
+```markdown
+## Summary
+
+<what was covered: target file, methods or branches, estimated line coverage before and after>
+
+## Evidence
+
+- **Before:** <the target's coverage from candidates.json>
+  **After:** <the passing test run output>
+
+## Notes
+
+<skipped candidates and why, suspected production bugs found, anything left uncovered>
+
+Coverage target: `path/of/the/target/file`
+```
+
+The `Coverage target:` line (with the path in backticks) must contain the exact `target` value from `candidates.json`, on a line of its own and not inside an HTML comment (those are stripped from PR bodies). The next run reads it to avoid choosing the same target again. The PR is a draft; a human reviews it and marks it ready.
+
+## Exit conditions
+
+Call `noop` and open no PR when no candidate qualifies, the tests cannot be made to pass, or the change would exceed the limits.
