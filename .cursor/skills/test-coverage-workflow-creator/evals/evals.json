@@ -1,0 +1,23 @@
+{
+  "skill_name": "test-coverage-workflow-creator",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "We have a .NET 9 API in src/ with xUnit tests in tests/, and our ci.yml already uploads a coverage.cobertura.xml as artifact 'coverage'. I want the same nightly test-coverage agent we have in DT-Geminex for this repo.",
+      "expected_output": "Discovers the .NET stack and the existing artifact, asks the interview forms with pre-filled defaults, previews the plan, then generates test-coverage.md, the selector script and its test, and config.json with a cobertura source; runs node --test and gh aw compile.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "set up a gh-aw workflow that writes jest tests every night for our react app in apps/web (yarn 4, no coverage in CI yet) and opens draft PRs only touching *.test.tsx",
+      "expected_output": "Notices there is no coverage source, recommends 'generate' with jest json-summary, sets pathPrefix/include for apps/web, restricts allowed-files to test globs, network includes node, and installs dependencies in setup steps rather than in the sandbox.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Can you copy the idea of DT-Geminex test-coverage.lock.yml to our Python + Go monorepo? Python uses pytest-cov, Go uses go test -coverprofile, both run in build.yml.",
+      "expected_output": "Generates one workflow covering two stacks with cobertura and go-coverprofile sources, edits the .md (not the lock file), compiles it, and lists the secrets and labels the user must create.",
+      "files": []
+    }
+  ]
+}

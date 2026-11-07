@@ -1,0 +1,28 @@
+{
+  "limit": 5,
+  "minUncoveredLines": 20,
+  "uncoveredCap": 300,
+  "sources": [
+    {
+      "stack": "backend",
+      "format": "cobertura",
+      "report": "/tmp/gh-aw/test-coverage/backend/coverage.cobertura.xml",
+      "pathPrefix": ""
+    },
+    {
+      "stack": "frontend",
+      "format": "lcov",
+      "report": "/tmp/gh-aw/test-coverage/frontend/lcov.info",
+      "pathPrefix": "web"
+    }
+  ],
+  "include": ["src/**", "web/src/**"],
+  "denylist": ["**/Migrations/**", "**/generated/**"],
+  "tiers": [
+    {
+      "tier": 3,
+      "reason": "Legacy area with high tech debt: only picked when no tier 1 candidate is left",
+      "paths": ["src/Legacy/**"]
+    }
+  ]
+}
