@@ -32,8 +32,8 @@ markdown loads.
 
 ```bash
 # from a marketplace (this repository is one)
-/plugin marketplace add dneprokos/agent-skills
-/plugin install slack-bug-triage@agent-skills
+/plugin marketplace add dneprokos/ai-toolkit
+/plugin install slack-bug-triage@ai-toolkit
 
 # or, while developing it
 claude --plugin-dir ./plugins/slack-bug-triage
